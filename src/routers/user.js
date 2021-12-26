@@ -17,7 +17,7 @@ router.post("/users/login", async (req, res) => {
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
-    res.status(403).send(error);
+    res.status(403).send({ error });
   }
 });
 
@@ -31,11 +31,21 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
+router.post("/users/logoutAll", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+    res.send(req.user);
+  } catch (error) {
+    res.send({ error });
+  }
+});
+
 router.get("/users/me", auth, async (req, res) => {
   try {
     res.send(req.user);
   } catch {
-    res.status(500).send();
+    res.status(500).send({ error });
   }
 });
 
@@ -45,17 +55,16 @@ router.post("/users", async (req, res) => {
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error });
   }
 });
 
-//Work on deletion
-
 router.delete("/users/me", auth, async (req, res) => {
   try {
+    await req.user.remove();
     res.send(req.user);
   } catch (error) {
-    res.status(500).send();
+    res.status(500).send({ error });
   }
 });
 
@@ -73,7 +82,7 @@ router.patch("/users/me", auth, async (req, res) => {
       res.send(req.user);
     }
   } catch (error) {
-    res.status(500).send();
+    res.status(500).send({ error });
   }
 });
 

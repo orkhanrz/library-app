@@ -12,7 +12,7 @@ const auth = async (req, res, next) => {
     });
 
     if (!user) {
-      throw new Error("Please authorize");
+      return res.status(403).send({ error: "Please authorize!" });
     }
 
     req.user = user;
