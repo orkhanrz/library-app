@@ -7,17 +7,37 @@ router.post("/books", auth, async (req, res) => {
   try {
     const book = new Book({ ...req.body, owner: req.user._id });
     await book.save();
-    res.send(book);
+    res.status(201).send(book);
   } catch (error) {
     res.status(500).send({ error });
   }
 });
 
 router.get("/books", auth, async (req, res) => {
-  try {
-    const books = await Book.find({ owner: req.user._id });
+  const match = {};
+  const sort = {};
 
-    res.send(books);
+  if (req.query.completed) {
+    match.completed = req.query.completed === "true";
+  }
+
+  if (req.query.sort) {
+    const parts = req.query.sort.split(":");
+    sort[parts[0]] = parts[1] === "asc" ? 1 : -1;
+    console.log(sort);
+  }
+
+  try {
+    await req.user.populate({
+      path: "books",
+      match,
+      options: {
+        limit: parseInt(req.query.limit),
+        skip: parseInt(req.query.skip),
+        sort,
+      },
+    });
+    res.send(req.user.books);
   } catch (error) {
     res.status(500).send({ error });
   }

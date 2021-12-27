@@ -2,7 +2,24 @@ const express = require("express");
 const router = new express.Router();
 const User = require("../models/user");
 const auth = require("../middleware/auth");
+const multer = require("multer");
 
+const upload = multer({
+  dest: "avatars",
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(
+        new Error("Please upload a jpg, jpeg or png with a size less than 1MB")
+      );
+    }
+    cb(undefined, true);
+  },
+});
+
+//Login User
 router.post("/users/login", async (req, res) => {
   try {
     const user = await User.findByCredentials(
@@ -21,6 +38,7 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
+//Remove last token to logout
 router.post("/users/logout", auth, async (req, res) => {
   try {
     req.user.tokens.pop();
@@ -31,6 +49,7 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
+//Remove all tokens to logout from all devices
 router.post("/users/logoutAll", auth, async (req, res) => {
   try {
     req.user.tokens = [];
@@ -41,6 +60,12 @@ router.post("/users/logoutAll", auth, async (req, res) => {
   }
 });
 
+//Upload Avatar
+router.post("/users/me/avatar", upload.single("avatar"), (req, res) => {
+  res.send();
+});
+
+//Get User Info
 router.get("/users/me", auth, async (req, res) => {
   try {
     res.send(req.user);
@@ -49,6 +74,7 @@ router.get("/users/me", auth, async (req, res) => {
   }
 });
 
+//Create User
 router.post("/users", async (req, res) => {
   try {
     const user = await new User(req.body);
@@ -59,6 +85,7 @@ router.post("/users", async (req, res) => {
   }
 });
 
+//Delete User
 router.delete("/users/me", auth, async (req, res) => {
   try {
     await req.user.remove();
@@ -68,6 +95,7 @@ router.delete("/users/me", auth, async (req, res) => {
   }
 });
 
+//Update User
 router.patch("/users/me", auth, async (req, res) => {
   const allowedUpdates = ["name", "email", "password"];
   const updates = Object.keys(req.body);
