@@ -73,14 +73,14 @@ router.patch("/users/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const isAllowed = updates.every((update) => allowedUpdates.includes(update));
 
+  if (!isAllowed) {
+    return res.status(403).send({ error: "Invalid operation!" });
+  }
+
   try {
-    if (!isAllowed) {
-      res.status(403).send("Operation invalid!");
-    } else {
-      updates.forEach((update) => (req.user[update] = req.body[update]));
-      await req.user.save();
-      res.send(req.user);
-    }
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+    await req.user.save();
+    res.send(req.user);
   } catch (error) {
     res.status(500).send({ error });
   }
