@@ -4,7 +4,7 @@ const userRouter = require("./routers/user");
 const bookRouter = require("./routers/book");
 require("./db/mongoose");
 
-const port = 3000;
+const port = process.env.PORT;
 app.use(express.json());
 app.use(userRouter);
 app.use(bookRouter);
