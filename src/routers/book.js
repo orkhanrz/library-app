@@ -15,7 +15,9 @@ router.post("/books", auth, async (req, res) => {
 
 router.get("/books", auth, async (req, res) => {
   const match = {};
-  const sort = {};
+  const options = {
+    sort: {},
+  };
 
   if (req.query.completed) {
     match.completed = req.query.completed === "true";
@@ -23,25 +25,22 @@ router.get("/books", auth, async (req, res) => {
 
   if (req.query.sort) {
     const parts = req.query.sort.split(":");
-    sort[parts[0]] = parts[1] === "asc" ? 1 : -1;
-    console.log(sort);
+    options.sort[parts[0]] = parts[1] === "asc" ? 1 : -1;
   }
 
   if (req.query.limit) {
-    options.limit = parseInt(req.query.limit);
+    options.limit = req.query.limit;
   }
 
   if (req.query.skip) {
-    options.skip = parseInt(req.query.skip);
+    options.skip = req.query.skip;
   }
 
   try {
     await req.user.populate({
       path: "books",
       match,
-      options: {
-        sort,
-      },
+      options,
     });
     res.send(req.user.books);
   } catch (error) {
