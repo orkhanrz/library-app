@@ -27,13 +27,19 @@ router.get("/books", auth, async (req, res) => {
     console.log(sort);
   }
 
+  if (req.query.limit) {
+    options.limit = parseInt(req.query.limit);
+  }
+
+  if (req.query.skip) {
+    options.skip = parseInt(req.query.skip);
+  }
+
   try {
     await req.user.populate({
       path: "books",
       match,
       options: {
-        limit: parseInt(req.query.limit),
-        skip: parseInt(req.query.skip),
         sort,
       },
     });

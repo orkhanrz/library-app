@@ -71,7 +71,9 @@ router.post("/users/login", async (req, res) => {
     );
 
     if (!user) {
-      return res.status(403).send("Please provide valid credentials!");
+      return res
+        .status(403)
+        .send({ error: "Please provide valid credentials!" });
     }
 
     const token = await user.generateAuthToken();
