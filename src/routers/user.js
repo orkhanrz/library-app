@@ -26,7 +26,7 @@ router.post("/users", async (req, res) => {
     const user = await new User(req.body);
     const token = await user.generateAuthToken();
     sendSignupMail(user.email, user.name);
-    res.send({ user, token });
+    res.status(201).send({ user, token });
   } catch (error) {
     res.status(500).send({ error });
   }
@@ -72,14 +72,14 @@ router.post("/users/login", async (req, res) => {
 
     if (!user) {
       return res
-        .status(403)
+        .status(404)
         .send({ error: "Please provide valid credentials!" });
     }
 
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
-    res.status(403).send({ error });
+    res.status(400).send({ error });
   }
 });
 
